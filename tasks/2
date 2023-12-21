@@ -1,56 +1,61 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLineEdit, QLabel, QPushButton
-from random import randint
+import random
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QLineEdit, QVBoxLayout, QWidget
 
-
-class Dice(QMainWindow):
+class DiceProbabilityApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.initUI()
 
-    def initUI(self):
-        self.setWindowTitle('Кубики')
-        central_widget = QWidget()
+        self.setWindowTitle('Вероятность выпадения суммы чисел на шестигранных кубиках')
+        self.setGeometry(100, 100, 400, 200)
 
-        self.setCentralWidget(central_widget)
-        self.dice_count_input = QLineEdit()
-        self.sum_input = QLineEdit()
-        self.result_label = QLabel()
+        self.label = QLabel('Введите количество кубиков:')
+        self.input_box = QLineEdit()
+        self.submit_button = QPushButton('Посчитать вероятность')
 
-        count_button = QPushButton("Посчитать вероятность")
-        count_button.clicked.connect(self.calculatePercentages)
+        self.result_label = QLabel('')
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Число кубиков:"))
-        layout.addWidget(self.dice_count_input)
-        layout.addWidget(count_button)
-
+        layout.addWidget(self.label)
+        layout.addWidget(self.input_box)
+        layout.addWidget(self.submit_button)
         layout.addWidget(self.result_label)
+
+        central_widget = QWidget()
         central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
 
-    def calculatePercentages(self):
-        result = {}
-        lst = []
-        sum = 0
-        percent = 0
-        dice_count = int(self.dice_count_input.text())
+        self.submit_button.clicked.connect(self.calculate_probability)
 
-        for _ in range(0, 1000000):
-            dice_num = 0
-            sum = 0
-            for j in range(dice_count):
-                dice_num = randint(1, 6)
-                sum = sum + dice_num
-            lst.append(sum)
+    def calculate_probability(self):
+        num_dice = self.input_box.text()
+        try:
+            num_dice = int(num_dice)
+            if num_dice > 0:
+                total_rolls = 1000000
+                counts = [0] * (6 * num_dice + 1)
 
-        for i in range(dice_count, (dice_count * 6) + 1):
-            percent = (lst.count(i)) / 10 ** 6 * 100
-            result[i] = percent
-        self.result_label.setText(str(result))
+                for _ in range(total_rolls):
+                    roll_sum = sum(random.randint(1, 6) for _ in range(num_dice))
+                    counts[roll_sum] += 1
 
+                probabilities = [count / total_rolls for count in counts]
 
-if name == '__main__':
+                result_text = 'Вероятности выпадения сумм чисел:\n'
+                for i in range(num_dice, 6 * num_dice + 1):
+                    result_text += f'{i}: {probabilities[i]:.6f}\n'
+
+                self.result_label.setText(result_text)
+            else:
+                self.result_label.setText('Введите положительное число кубиков')
+        except ValueError:
+            self.result_label.setText('Введите корректное число кубиков')
+
+def run_app():
     app = QApplication(sys.argv)
-    window = Dice()
+    window = DiceProbabilityApp()
     window.show()
     sys.exit(app.exec())
+
+if __name__ == "__main__":
+    run_app()
