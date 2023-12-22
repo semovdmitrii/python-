@@ -1,1 +1,44 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QMessageBox
 
+# Создаем таблицу Менделеева
+table = [
+    ["H", "Hydrogen", "1.00784", "1"],
+    ["He", "Helium", "4.0026", "2"],
+    ["Li", "Lithium", "6.94", "3"],
+    # продолжаем для остальных элементов
+]
+
+# Создаем приложение Qt
+app = QApplication(sys.argv)
+
+# Создаем виджет таблицы
+table_widget = QTableWidget()
+table_widget.setRowCount(10)
+table_widget.setColumnCount(18)
+
+# Заполняем ячейки таблицы
+for i, row in enumerate(table):
+    for j, elem in enumerate(row):
+        item = QTableWidgetItem(elem)
+        table_widget.setItem(i, j, item)
+
+# Определяем слот для обработки события нажатия на ячейку таблицы
+def show_element_info(row, column):
+    element = table[row][0]  # Получаем символ элемента
+    info = table[row][1:]   # Получаем остальные данные элемента
+
+    # Создаем диалоговое окно с информацией об элементе
+    msg_box = QMessageBox()
+    msg_box.setWindowTitle("Информация об элементе")
+    msg_box.setText(f"Символ: {element}\nНазвание: {info[0]}\nМасса: {info[1]}\nАтомный номер: {info[2]}")
+    msg_box.exec()
+
+# Подключаем слот к сигналу нажатия на ячейку таблицы
+table_widget.cellClicked.connect(show_element_info)
+
+# Отображаем таблицу
+table_widget.show()
+
+# Запускаем главный цикл приложения
+sys.exit(app.exec())
